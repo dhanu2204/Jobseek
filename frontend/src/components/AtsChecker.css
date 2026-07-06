@@ -1,0 +1,570 @@
+/* Core Layout Grid */
+.ats-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8fafc;
+}
+
+.ats-workspace {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  height: calc(100vh - 73px);
+  overflow: hidden;
+}
+
+/* Left Form Panel */
+.ats-form-panel {
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ats-form-panel h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.subtitle-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: -10px;
+}
+
+/* Input Fields */
+.ats-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ats-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ats-select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius);
+  background-color: var(--input-bg);
+  outline: none;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.ats-file-input {
+  padding: 8px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: #f8fafc;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.ats-textarea {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius);
+  background-color: var(--input-bg);
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.ats-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.analyze-submit-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 10px;
+}
+
+.analyze-submit-btn:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.analyze-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Right Output Results Panel */
+.ats-results-panel {
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty View / Loading States */
+.ats-empty-view,
+.ats-loading-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  gap: 16px;
+  padding: 40px;
+}
+
+.analysis-icon {
+  font-size: 48px;
+}
+
+.ats-empty-view h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #cbd5e1;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Results Content */
+.ats-results-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Score Assessment Card */
+.score-summary-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Radial Score SVG Indicator */
+.score-circle-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.score-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 2.8;
+}
+
+.circle-fill {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease-out;
+}
+
+.score-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.score-assessment h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.score-assessment p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Tab Bar */
+.result-tabs-bar {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  gap: 12px;
+}
+
+.tab-btn {
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: var(--transition);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Tab Content details */
+.tab-contents h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.tips-subtext {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+/* Chips grids */
+.keyword-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.match-chip {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.missing-chip {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.success-text {
+  font-size: 13px;
+  color: #059669;
+  font-weight: 500;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Formatting checklist audit items */
+.audit-checklist-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.bullet-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.tip-text {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+/* AI Optimized Tab Layout styling */
+.optimized-tab-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.optimized-download-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background-color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.optimized-download-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.download-optimized-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.download-optimized-btn:hover {
+  background-color: #059669;
+}
+
+/* On-screen A4 simulated resume preview document */
+.resume-sheet {
+  width: 100%;
+  max-width: 800px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Reduced gap from 20px to 12px for standardLaTeX tight structure */
+  font-family: 'Times New Roman', Times, Georgia, serif;
+  color: #111827;
+  padding: 24px; /* Reduced screen padding from 32px to 24px */
+  border-radius: 8px;
+}
+
+/* Resume PDF inner typography */
+.resume-header {
+  text-align: center;
+  border-bottom: 2px solid #111827;
+  padding-bottom: 8px; /* Reduced spacing */
+}
+
+.resume-name {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #000000;
+  text-transform: uppercase;
+}
+
+.resume-contact-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: #374151;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.resume-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Reduced gap inside sections */
+}
+
+.resume-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #000000;
+  border-bottom: 1px solid #111827;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+}
+
+.resume-section-body {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #111827;
+  text-align: justify;
+}
+
+.resume-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 6px; /* Reduced item margin */
+}
+
+.resume-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.resume-item-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.resume-item-duration {
+  font-size: 11px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.resume-item-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  font-style: italic;
+}
+
+.resume-item-details {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #111827;
+  margin-top: 2px;
+  white-space: pre-line;
+}
+
+.resume-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.resume-skill-tag {
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+}
+
+/* Hidden Print-Only Layout on Screen */
+.print-sheet-optimized {
+  display: none;
+}
+
+/* Responsive adjustment splits */
+@media (max-width: 1024px) {
+  .ats-workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+  .ats-form-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+/* ==========================================================================
+   PRINTER FRIENDLY CSS RULE OVERRIDES FOR THE OPTIMIZED DOWNLOAD
+   ========================================================================== */
+@media print {
+  /* Hide the entire web UI from printing */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Make sure the sibling element prints */
+  body {
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-sheet-optimized {
+    display: flex !important; /* Make print sheet visible */
+    flex-direction: column;
+    gap: 12px; /* LaTeX tight standard spacing */
+    font-family: 'Times New Roman', Times, Georgia, serif;
+    color: #111827;
+    background-color: #ffffff !important;
+    
+    /* Reduced Margins: 12mm (~0.5 inch) on all sides */
+    padding: 12mm !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 297mm !important;
+  }
+
+  /* Keep skill tags colored */
+  .resume-skill-tag {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+  }
+
+  /* Strip browser headers & footers (URL, page numbers, date) */
+  @page {
+    size: A4;
+    margin: 0 !important; /* Removes all default browser decorations! */
+  }
+}

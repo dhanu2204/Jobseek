@@ -1,0 +1,136 @@
+/* Base Container Layout */
+.payment-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+}
+
+.payment-workspace {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 40px 20px;
+}
+
+/* Centered Payment Box card */
+.payment-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 40px;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.payment-card h2 {
+  font-size: 24px;
+  font-weight: 850;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.payment-card .subtitle {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: -12px;
+}
+
+/* Premium Badge Indicator */
+.premium-badge {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  align-self: center;
+}
+
+/* Price Box */
+.price-tag {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price-tag .amount {
+  font-size: 32px;
+  font-weight: 850;
+  color: var(--primary);
+}
+
+[data-theme='dark'] .price-tag .amount {
+  color: #2dd4bf;
+}
+
+.price-tag .period {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Perks List */
+.premium-perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  margin: 8px 0;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.perk-item {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  font-weight: 550;
+}
+
+/* Action button to launch Gateway */
+.pay-now-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 14.5px;
+  font-weight: 750;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+  margin-top: 8px;
+}
+
+.pay-now-btn:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+[data-theme='dark'] .pay-now-btn {
+  background-color: #2dd4bf;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .pay-now-btn:hover:not(:disabled) {
+  background-color: #14b8a6;
+}
+
+.pay-now-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

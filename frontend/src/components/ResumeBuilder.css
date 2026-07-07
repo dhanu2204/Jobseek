@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg-color);
 }
 
 /* Navbar actions styling */
@@ -57,7 +57,7 @@
   padding: 20px;
   overflow-y: auto;
   border-right: 1px solid var(--border-color);
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -192,13 +192,13 @@
 }
 
 .add-list-item-btn:hover {
-  background-color: #f5f3ff;
+  background-color: rgba(99, 102, 241, 0.08);
 }
 
 /* Job/School List Cards */
 .list-item-card {
   padding: 16px;
-  background-color: #f8fafc;
+  background-color: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   display: flex;
@@ -229,7 +229,7 @@
 .preview-panel {
   padding: 20px;
   overflow-y: auto;
-  background-color: #e2e8f0; /* Darker slate background to make paper stand out */
+  background-color: var(--bg-color); /* Darker slate background to make paper stand out */
   display: flex;
   justify-content: center;
   align-items: flex-start;

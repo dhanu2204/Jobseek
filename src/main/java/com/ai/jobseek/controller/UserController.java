@@ -41,5 +41,10 @@ public class UserController {
     public Users updateProfile(@RequestBody Users u) {
         return userservice.updateUserProfile(u);
     }
+
+    @PostMapping("upgrade/{id}")
+    public Users upgradeToPremium(@PathVariable Integer id) {
+        return userservice.upgradeToPremium(id);
+    }
     
 }

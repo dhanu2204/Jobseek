@@ -2,6 +2,7 @@ import React from 'react'
 import { useState ,useEffect} from 'react'
 import "./Jobs.css"
 import { useNavigate } from 'react-router-dom'
+import ThemeToggle from './ThemeToggle'
 
 const Jobs = () => {
     const [searchQuery,setSearchQuery]=useState('')
@@ -173,12 +174,15 @@ const Jobs = () => {
 
    return (
     <div className='jobs-container'>
-        <nav className='navbar'>
-            <div className='nav-logo' onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
-                JobSeek<span className="brand-dot"></span>
-            </div>
-            <button onClick={() => nav('/home')} className="back-button">Back To Dashboard</button>
-        </nav>
+         <nav className='navbar'>
+             <div className='nav-logo' onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
+                 JobSeek<span className="brand-dot"></span>
+             </div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                 <ThemeToggle />
+                 <button onClick={() => nav('/home')} className="back-button">Back To Dashboard</button>
+             </div>
+         </nav>
         <div className='search-section'>
             <h1 className='search-title'>Explore Remote Tech Jobs</h1>
             <form onSubmit={handleSearchSubmit} className='search-form'>

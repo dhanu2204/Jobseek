@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import './ResumeBuilder.css'
+import ThemeToggle from './ThemeToggle'
 
 const ResumeBuilder = () => {
     const nav = useNavigate()
@@ -174,6 +175,13 @@ const ResumeBuilder = () => {
             alert('You must be logged in to save!')
             return
         }
+
+        const isPremium = loggedUser.premium || false;
+        if (!resumeId && allResumes.length >= 100 && !isPremium) {
+            alert("You have reached the free limit of 100 resumes. Please purchase Premium on the dashboard!");
+            nav('/home');
+            return;
+        }
         const payload = {
             id: resumeId,
             user: {
@@ -223,7 +231,8 @@ const ResumeBuilder = () => {
                 <div className='nav-logo' onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
                     JobSeek<span className='brand-dot'></span>
                 </div>
-                <div className='nav-actions'>
+                <div className='nav-actions' style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <ThemeToggle />
                     <button onClick={handleSave} className='save-button'>Save Resume</button>
                     <button onClick={handleDownloadPDF} className='download-button'>Download Resume</button>
                     <button onClick={() => nav('/home')} className='back-button'>Back to Dashboard</button>

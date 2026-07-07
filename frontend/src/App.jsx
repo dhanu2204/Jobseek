@@ -10,7 +10,8 @@ import AtsChecker from './components/AtsChecker' // Imported AtsChecker
 import MockInterview from './components/MockInterview' // Imported MockInterview
 import Profile from './components/Profile' // Imported Profile
 import Playground from './components/Playground'
-
+import Library from './components/Library' // Imported Library
+import Payment from './components/Payment'
 
 const App = () => {
   return (
@@ -22,10 +23,12 @@ const App = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/jobs" element={<Jobs />} />
       <Route path="/resume" element={<ResumeBuilder />} />
-      <Route path="/ats" element={<AtsChecker />} /> {/* Registered route */}
-      <Route path="/interview" element={<MockInterview />} /> {/* Registered route */}
-      <Route path="/profile" element={<Profile />} /> {/* Registered route */}
-      <Route path="/playground" element={<Playground />} /> {/* Registered route */}
+      <Route path="/ats" element={<AtsChecker />} />
+      <Route path="/interview" element={<MockInterview />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/playground" element={<Playground />} /> 
+      <Route path="/library" element={<Library />} /> 
+      <Route path="/payment" element={<Payment />} /> 
     </Routes>
     </BrowserRouter>
   )

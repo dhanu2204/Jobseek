@@ -1,25 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './MockInterview.css'
+import ThemeToggle from './ThemeToggle'
 
 const MockInterview = () => {
     const nav = useNavigate()
     const [jobTitle, setJobTitle] = useState('')
     const [jobDescription, setJobDescription] = useState('')
-    const [difficulty, setDifficulty] = useState('beginner') // beginner, intermediate, hard
+    const [difficulty, setDifficulty] = useState('beginner') 
     const [resumeList, setResumeList] = useState([])
     const [selectedResumeId, setSelectedResumeId] = useState('none')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [setupMode, setSetupMode] = useState('manual') // manual, upload
+    const [setupMode, setSetupMode] = useState('manual') 
     const [uploadedFile, setUploadedFile] = useState(null)
 
-    // Chat room states
     const [messages, setMessages] = useState([])
     const [currentQuestion, setCurrentQuestion] = useState('')
     const [questionCount, setQuestionCount] = useState(0)
 
-    // 30-Minute Timer (1800 seconds)
     const [timeLeft, setTimeLeft] = useState(1800)
 
     // Voice states
@@ -29,12 +28,33 @@ const MockInterview = () => {
 
     // Final evaluation state
     const [finalReport, setFinalReport] = useState(null)
+    const [interviewsCount, setInterviewsCount] = useState(0)
+    const [isPremium, setIsPremium] = useState(false)
 
     // Refs for speech API and scrolling
     const recognitionRef = useRef(null)
     const chatEndRef = useRef(null)
 
     // Auto-scroll logic
+    useEffect(() => {
+        const fetchUsage = async () => {
+            const userString = localStorage.getItem('user')
+            const user = userString ? JSON.parse(userString) : null
+            if (user && user.id) {
+                setIsPremium(user.premium || false)
+                try {
+                    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/usage/${user.id}`)
+                    if (response.ok) {
+                        const data = await response.json()
+                        setInterviewsCount(data.interviewsCount || 0)
+                    }
+                } catch (err) {
+                    console.error("Usage fetch failed:", err)
+                }
+            }
+        }
+        fetchUsage()
+    }, [])
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, currentQuestion])
@@ -195,6 +215,11 @@ const MockInterview = () => {
     // Start Interview Session
     const startInterview = async (e) => {
         e.preventDefault()
+         if (!isPremium && interviewsCount >= 100) {
+            alert("You have reached the free limit of 100 Mock Interviews. Please purchase Premium on the dashboard!");
+            nav('/home');
+            return;
+        }
 
         let finalJobTitle = jobTitle
         let finalJobDescription = jobDescription
@@ -567,7 +592,10 @@ const MockInterview = () => {
                 <div className="nav-logo" onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
                     JobSeek<span className="brand-dot"></span>
                 </div>
-                <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <ThemeToggle />
+                    <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                </div>
             </nav>
 
             {!isInterviewActive && !finalReport && (

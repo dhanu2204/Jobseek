@@ -12,4 +12,8 @@ import com.ai.jobseek.model.Users;
 public interface ResumeRepo extends JpaRepository<Resume, Integer> {
     public List<Resume> findByUserId(Integer userId);
     public void deleteById(Integer id);
+
+    // Inside ResumeRepo.java (between the curly braces)
+    long countByUserId(Integer userId);
+
 }

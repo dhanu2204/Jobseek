@@ -48,4 +48,26 @@ public class UserService {
         return null;
     }
 
+    public Users upgradeToPremium(Integer id)
+    {
+        Users existing = userrepo.findById(id).orElse(null);
+        if(existing != null)
+        {
+            existing.setPremium(true);
+            return userrepo.save(existing);
+        }
+        return null;
+    }
+    
+
+    public Users incrementAtsScanCount(Integer id)
+    {
+        Users existing = userrepo.findById(id).orElse(null);
+        if(existing != null)
+        {
+            existing.setAtsScansCount(existing.getAtsScansCount() + 1);
+            return userrepo.save(existing);
+        }
+        return null;
+    }
 }

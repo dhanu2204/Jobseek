@@ -691,3 +691,138 @@
     padding-bottom: 24px;
   }
 }
+
+/* Light theme overrides for MockInterview */
+[data-theme='light'] .interview-container {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .interview-container .navbar {
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme='light'] .interview-container .back-button {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+[data-theme='light'] .interview-container .back-button:hover {
+  background-color: var(--input-border);
+}
+
+[data-theme='light'] .interview-setup-panel {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme='light'] .interview-setup-panel h2 {
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .setup-form input,
+[data-theme='light'] .setup-form select,
+[data-theme='light'] .setup-form textarea {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .chat-log-panel {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='light'] .chat-header {
+  background-color: var(--input-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='light'] .chat-header h3 {
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .timer-tag {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+[data-theme='light'] .bubble-message {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme='light'] .chat-bubble-row.interviewer .bubble-message {
+  background-color: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme='light'] .voice-control-panel {
+  background-color: var(--input-bg);
+  border-top-color: var(--border-color);
+}
+
+[data-theme='light'] .scorecard-panel {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='light'] .scorecard-panel h2 {
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .score-header-grid {
+  border-color: var(--border-color);
+}
+
+[data-theme='light'] .score-header-grid h1 {
+  color: var(--primary);
+}
+
+[data-theme='light'] .suggest-col {
+  border-left-color: var(--border-color);
+}
+
+[data-theme='light'] .suggest-col h3,
+[data-theme='light'] .strength-col h3 {
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .bullet-item {
+  color: var(--text-secondary);
+}
+
+[data-theme='light'] .qa-item-card {
+  background-color: var(--input-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='light'] .qa-question-text {
+  color: var(--text-primary);
+}
+
+[data-theme='light'] .qa-answer-text {
+  color: var(--text-secondary);
+  border-left-color: var(--border-color);
+}
+
+[data-theme='light'] .qa-feedback-text {
+  color: var(--text-primary);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme='light'] .back-home-btn {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+[data-theme='light'] .back-home-btn:hover {
+  background-color: var(--input-border);
+}

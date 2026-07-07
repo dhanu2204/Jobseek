@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface MockInterviewReportRepo extends JpaRepository<MockInterviewReport, Integer> {
     List<MockInterviewReport> findByUserIdId(Integer userId);
+    long countByUserIdId(Integer userId);
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Profile.css'
+import ThemeToggle from './ThemeToggle'
 
 const Profile = () => {
     const nav = useNavigate()
@@ -163,7 +164,10 @@ const Profile = () => {
                 <div className="nav-logo" onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
                     JobSeek<span className="brand-dot"></span>
                 </div>
-                <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <ThemeToggle />
+                    <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                </div>
             </nav>
 
             {loading && <div className="loading-spinner-wrapper"><div className="spinner"></div><p>Retrieving profile data...</p></div>}

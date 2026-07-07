@@ -21,7 +21,6 @@ public class Users {
     private String password;
     private String mobile;
     
-    // New Professional Profile Columns
     private String headline;
     private String bio;
     private String skills;
@@ -29,4 +28,7 @@ public class Users {
     private String education;
     private String githubUrl;
     private String linkedinUrl;
+
+    private boolean premium = false;
+    private int atsScansCount = 0;
 }

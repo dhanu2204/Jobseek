@@ -135,7 +135,7 @@
   object-fit: contain;
   border-radius: 8px;
   border: 1px solid var(--border-color);
-  background-color: #f8fafc;
+  background-color: var(--input-bg);
 }
 
 .job-title-text {

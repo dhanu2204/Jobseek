@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg-color);
 }
 
 .profile-workspace {
@@ -17,7 +17,7 @@
 .profile-form-panel {
   padding: 20px;
   overflow-y: auto;
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -132,7 +132,7 @@
 .profile-audit-panel {
   padding: 20px;
   overflow-y: auto;
-  background-color: #f1f5f9;
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -140,7 +140,7 @@
 
 /* Audit Strength Card */
 .audit-card-wrapper {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   padding: 16px;
   border-radius: 12px;
@@ -205,7 +205,7 @@
 
 /* Unfilled Field Checklist */
 .unfilled-checklist-card {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   padding: 16px;
   border-radius: 12px;
@@ -263,7 +263,7 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--primary);
-  background-color: #ffffff;
+  background-color: var(--input-bg);
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid var(--border-color);
@@ -298,14 +298,28 @@
 
 /* Interview History Card styling */
 .interview-history-card {
-  background-color: #f8fafc;
+  background-color: var(--input-bg);
   border: 1px solid var(--border-color);
   padding: 12px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  position: relative;
   text-align: left;
+}
+
+[data-theme='dark'] .issue-alert-row {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+[data-theme='dark'] .alert-text-label {
+  color: #fca5a5;
+}
+
+[data-theme='dark'] .edit-shortcut-btn {
+  color: #2dd4bf;
 }
 
 .history-header {

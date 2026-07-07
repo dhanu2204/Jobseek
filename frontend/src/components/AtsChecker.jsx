@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AtsChecker.css'
+import ThemeToggle from './ThemeToggle'
 
 const AtsChecker = () => {
     const nav = useNavigate()
@@ -12,6 +13,32 @@ const AtsChecker = () => {
     const [result, setResult] = useState(null)
     const [activeTab, setActiveTab] = useState('keywords')
 
+    const [scanCount, setScanCount] = useState(0)
+    const [isPremium, setIsPremium] = useState(false)
+    
+    useEffect(()=>{
+        const fetchUsage = async()=>{
+            const userString = localStorage.getItem('user')
+            const user = userString ? JSON.parse(userString) : null
+            if(user && user.id)
+            {
+                setIsPremium(user.premium || false)
+                try{
+                    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/usage/${user.id}`)
+                    if(response.ok)
+                    {
+                        const data = await response.json()
+                        setScanCount(data.atsScansCount||0)
+                    }
+                }
+                catch(err)
+                {
+                    console.log("Usage fetch failed:",err)
+                }
+            }
+        }
+        fetchUsage()
+    },[])
     useEffect(() => {
         const fetchResume = async () => {
             const userString = localStorage.getItem('user')
@@ -66,6 +93,11 @@ const AtsChecker = () => {
 
     const runAnalysis = async (e) => {
         e.preventDefault()
+        if (!isPremium && scanCount >= 100) {
+            alert("You have reached the free limit of 100 ATS scans. Please buy Premium on the dashboard!");
+            nav('/home');
+            return;
+        }
         if (!jobDescription.trim()) {
             alert("Please paste a Job Description to analyze.")
             return
@@ -153,7 +185,20 @@ const AtsChecker = () => {
                 const cleanedJson = rawText.replace(/```json|```/g, '').trim()
                 const parsedJson = JSON.parse(cleanedJson)
                 setResult(parsedJson)
+
+                const userString = localStorage.getItem('user');
+            const loggedUser = userString ? JSON.parse(userString) : null;
+            if (loggedUser && loggedUser.id) {
+                const incRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/increment-ats/${loggedUser.id}`, {
+                    method: 'POST'
+                });
+                if (incRes.ok) {
+                    const updatedUser = await incRes.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    setScanCount(updatedUser.atsScansCount);
+                }
             }
+        }
             else {
                 const errdata = await response.json()
                 alert(`API Error: ${errdata.error?.message || response.statusText}`)
@@ -179,7 +224,8 @@ const AtsChecker = () => {
                     <div className="nav-logo" onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
                         JobSeek<span className="brand-dot"></span>
                     </div>
-                    <div className="nav-actions">
+                    <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <ThemeToggle />
                         <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
                     </div>
                 </nav>

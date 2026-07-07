@@ -2,6 +2,7 @@ import React,{useState,useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import './Playground.css'
+import ThemeToggle from './ThemeToggle'
 
 
 const Playground = () => {
@@ -386,7 +387,10 @@ return (
                 <div className="nav-logo" onClick={() => nav('/home')} style={{ cursor: 'pointer' }}>
                     JobSeek<span className="brand-dot"></span>
                 </div>
-                <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <ThemeToggle />
+                    <button onClick={() => nav('/home')} className="back-button">Back to Dashboard</button>
+                </div>
             </nav>
             <div className="playground-workspace">
                 {/* Left Column - Configuration & Problem details */}

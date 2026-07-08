@@ -14,16 +14,15 @@ const MockInterview = () => {
     const [loading, setLoading] = useState(false)
     const [setupMode, setSetupMode] = useState('manual') 
     const [uploadedFile, setUploadedFile] = useState(null)
+    const [customFocus, setCustomFocus] = useState('')
 
-    const [messages, setMessages] = useState([])
-    const [currentQuestion, setCurrentQuestion] = useState('')
-    const [questionCount, setQuestionCount] = useState(0)
-
-    const [timeLeft, setTimeLeft] = useState(1800)
+    // Batch states
+    const [questionsList, setQuestionsList] = useState([])
+    const [answers, setAnswers] = useState([])
+    const [activeMicIndex, setActiveMicIndex] = useState(null)
 
     // Voice states
     const [isListening, setIsListening] = useState(false)
-    const [voiceTranscript, setVoiceTranscript] = useState('')
     const [speechSupported, setSpeechSupported] = useState(false)
 
     // Final evaluation state
@@ -33,7 +32,11 @@ const MockInterview = () => {
 
     // Refs for speech API and scrolling
     const recognitionRef = useRef(null)
-    const chatEndRef = useRef(null)
+    const shouldBeListeningRef = useRef(false)
+    const accumulatedTranscriptRef = useRef('')
+    const voiceTranscriptRef = useRef('')
+    const activeMicIndexRef = useRef(null)
+    const answersRef = useRef([])
 
     // Auto-scroll logic
     useEffect(() => {
@@ -79,18 +82,10 @@ const MockInterview = () => {
         fetchResumes()
     }, [])
 
-    // Timer countdown effect
+    // Timer countdown disabled (runs until ended manually)
     useEffect(() => {
-        let timer = null
-        if (isInterviewActive && timeLeft > 0) {
-            timer = setInterval(() => {
-                setTimeLeft(prev => prev - 1)
-            }, 1000)
-        } else if (timeLeft === 0 && isInterviewActive) {
-            handleEndInterview() // End interview when time runs out
-        }
-        return () => clearInterval(timer)
-    }, [isInterviewActive, timeLeft])
+        // Countdown timer has been removed per request
+    }, [isInterviewActive])
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -105,23 +100,52 @@ const MockInterview = () => {
             rec.onresult = (event) => {
                 let interim = ''
                 let final = ''
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                for (let i = 0; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        final += event.results[i][0].transcript
+                        final += event.results[i][0].transcript + ' '
                     } else {
                         interim += event.results[i][0].transcript
                     }
                 }
-                setVoiceTranscript(final || interim)
+                const newText = (accumulatedTranscriptRef.current + ' ' + final + interim).trim().replace(/\s+/g, ' ')
+                
+                const idx = activeMicIndexRef.current
+                if (idx !== null) {
+                    const newAnswers = [...answersRef.current]
+                    newAnswers[idx] = newText
+                    answersRef.current = newAnswers
+                    setAnswers(newAnswers)
+                    voiceTranscriptRef.current = newText
+                }
             }
 
             rec.onerror = (e) => {
                 console.error("Speech Recognition Error:", e)
-                setIsListening(false)
+                if (e.error === 'not-allowed') {
+                    shouldBeListeningRef.current = false
+                    activeMicIndexRef.current = null
+                    setActiveMicIndex(null)
+                    setIsListening(false)
+                }
             }
 
             rec.onend = () => {
-                setIsListening(false)
+                if (shouldBeListeningRef.current) {
+                    accumulatedTranscriptRef.current = voiceTranscriptRef.current
+                    setTimeout(() => {
+                        if (shouldBeListeningRef.current) {
+                            try {
+                                rec.start()
+                            } catch (err) {
+                                console.error("Auto-restart mic failed:", err)
+                            }
+                        }
+                    }, 800)
+                } else {
+                    setIsListening(false)
+                    setActiveMicIndex(null)
+                    activeMicIndexRef.current = null
+                }
             }
 
             recognitionRef.current = rec
@@ -137,9 +161,14 @@ const MockInterview = () => {
             utterance.pitch = 1.0
             
             const voices = window.speechSynthesis.getVoices()
-            const defaultVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Natural')) || voices.find(v => v.lang.startsWith('en'))
-            if (defaultVoice) {
-                utterance.voice = defaultVoice
+            const maleVoice = voices.find(v => v.lang.startsWith('en') && 
+                (v.name.toLowerCase().includes('male') || 
+                 v.name.toLowerCase().includes('david') || 
+                 v.name.toLowerCase().includes('guy') || 
+                 v.name.toLowerCase().includes('microsoft david'))) 
+                || voices.find(v => v.lang.startsWith('en'))
+            if (maleVoice) {
+                utterance.voice = maleVoice
             }
             
             window.speechSynthesis.speak(utterance)
@@ -152,20 +181,38 @@ const MockInterview = () => {
         return `${m}:${s < 10 ? '0' : ''}${s}`
     }
 
-    const toggleListening = () => {
+    const toggleListening = (idx) => {
         if (!speechSupported) {
             alert("Speech recognition is not supported in this browser. Please use Google Chrome or Edge.")
             return
         }
 
-        if (isListening) {
+        if (activeMicIndexRef.current === idx) {
+            // Stop listening
+            shouldBeListeningRef.current = false
+            activeMicIndexRef.current = null
+            setActiveMicIndex(null)
             recognitionRef.current.stop()
             setIsListening(false)
         } else {
-            setVoiceTranscript('')
+            // Stop current listening first if active
+            if (activeMicIndexRef.current !== null) {
+                shouldBeListeningRef.current = false
+                recognitionRef.current.stop()
+            }
+            
+            // Start listening for new index
+            const currentAnswerText = answersRef.current[idx] || ''
+            accumulatedTranscriptRef.current = currentAnswerText
+            voiceTranscriptRef.current = currentAnswerText
+            
+            activeMicIndexRef.current = idx
+            setActiveMicIndex(idx)
+            shouldBeListeningRef.current = true
+            setIsListening(true)
+            
             try {
                 recognitionRef.current.start()
-                setIsListening(true)
             } catch (err) {
                 console.error("Mic start failed:", err)
             }
@@ -268,7 +315,11 @@ const MockInterview = () => {
                 )
 
                 if (!response.ok) {
-                    throw new Error("Failed to contact Gemini to parse the job description.")
+                    if (response.status === 429) {
+                        throw new Error("Google Gemini API rate limit reached (429 Too Many Requests). Please wait 1 minute for the rate limit to reset and try starting again.")
+                    } else {
+                        throw new Error(`Failed to contact Gemini to parse the job description. (Status ${response.status})`)
+                    }
                 }
 
                 const data = await response.json()
@@ -287,6 +338,16 @@ const MockInterview = () => {
                 setLoading(false)
                 return
             }
+        } else if (setupMode === 'custom') {
+            if (!customFocus.trim()) {
+                alert("Please enter the Language or Tool you want to be interviewed on.")
+                setLoading(false)
+                return
+            }
+            finalJobTitle = `Custom Focus: ${customFocus}`
+            finalJobDescription = `Core concepts of ${customFocus}`
+            setJobTitle(finalJobTitle)
+            setJobDescription(finalJobDescription)
         } else {
             if (!finalJobTitle.trim() || !finalJobDescription.trim()) {
                 alert("Please specify the Job Role and Description.")
@@ -315,16 +376,16 @@ const MockInterview = () => {
             }
         }
 
-        // Formulate First Question Prompt based on Difficulty
+        // Formulate Question Generation Prompt based on Difficulty/Custom Setup
         let difficultyInstruction = ""
-        if (difficulty === 'beginner') {
-            difficultyInstruction = `The candidate is a GRADUATE/FRESHER with no professional experience.
-                Focus your technical questions on core programming languages, basic tools, technologies, and SPECIFICALLY on the projects they completed as listed in their resume:
+        if (setupMode === 'custom') {
+            difficultyInstruction = `The candidate wants a custom technical focus interview on the language/tool: ${customFocus}. You must ask commonly asked technical interview questions ONLY on the core concepts of ${customFocus}. Do not ask about any other libraries, systems, or project details. Only ask about core concepts of ${customFocus}.`
+        } else if (difficulty === 'beginner') {
+            difficultyInstruction = `The candidate is a GRADUATE/FRESHER with no professional experience. Focus your technical questions on core programming languages, basic tools, technologies, and SPECIFICALLY on the projects they completed as listed in their resume:
                 --- CANDIDATE RESUME ---
                 ${resumeDetails}`
         } else if (difficulty === 'intermediate') {
-            difficultyInstruction = `The candidate is an INTERMEDIATE developer.
-                Ask technical questions about framework internals, code optimization, database schema relationships, and a few basic project-related questions from their resume:
+            difficultyInstruction = `The candidate is an INTERMEDIATE developer. Ask technical questions about framework internals, code optimization, database schema relationships, and a few basic project-related questions from their resume:
                 --- CANDIDATE RESUME ---
                 ${resumeDetails}`
         } else {
@@ -336,11 +397,11 @@ const MockInterview = () => {
             
             ${difficultyInstruction}
             
-            Introduce yourself briefly and ask the first technical interview question. 
-            Do not ask general introductory questions like 'tell me about yourself'. Start with a solid technical question.
+            Generate exactly 10 distinct, technical interview questions.
+            Do not ask general introductory questions like 'tell me about yourself'. Start directly with solid technical questions.
             
-            Return a JSON object containing exactly these keys:
-            - "question": "The interview question string"
+            Return a JSON object containing exactly this key:
+            - "questions": ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5", "Question 6", "Question 7", "Question 8", "Question 9", "Question 10"]
             
             Return ONLY the raw JSON object. Do not include markdown wraps (like \`\`\`json).`
 
@@ -354,74 +415,99 @@ const MockInterview = () => {
                 }
             )
 
-            if (response.ok) {
-                const data = await response.json()
-                const rawText = data.candidates[0].content.parts[0].text
-                const cleanJson = rawText.replace(/```json|```/g, '').trim()
-                const parsed = JSON.parse(cleanJson)
-
-                setCurrentQuestion(parsed.question)
-                setQuestionCount(1)
-                speakText(parsed.question)
-            } else {
-                alert("Failed to connect to Gemini AI. Check your API key.")
-                setIsInterviewActive(false)
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error("Google Gemini API rate limit reached (429 Too Many Requests). Please wait 1 minute for the rate limit to reset and try starting again.")
+                } else {
+                    throw new Error(`Failed to contact Gemini to generate questions. (Status ${response.status})`)
+                }
             }
+
+            const data = await response.json()
+            const rawText = data.candidates[0].content.parts[0].text
+            const cleanJson = rawText.replace(/```json|```/g, '').trim()
+            const parsedData = JSON.parse(cleanJson)
+
+            const list = parsedData.questions || []
+            if (list.length === 0) {
+                throw new Error("Failed to parse questions array.")
+            }
+
+            setQuestionsList(list)
+            
+            // Initialize answers array with empty strings for each question
+            const emptyAnswers = new Array(list.length).fill('')
+            setAnswers(emptyAnswers)
+            answersRef.current = emptyAnswers
+
+            setIsInterviewActive(true)
+            setFinalReport(null)
+            
+            const introMsg = "Hello! I am Zoro, your technical interviewer. I have generated 10 questions for your interview session. Please speak or type your answers for each question below, then click Submit Answers at the bottom."
+            speakText(introMsg)
         } catch (err) {
             console.error(err)
-            alert("Error starting interview.")
+            alert("Error starting interview: " + err.message)
             setIsInterviewActive(false)
         } finally {
             setLoading(false)
         }
     }
 
-    // Submit user answer & trigger evaluation + next question
-    const submitAnswer = async () => {
-        if (!voiceTranscript.trim() && !loading) {
-            alert("Please speak or type an answer first!")
-            return
-        }
-
-        const answerText = voiceTranscript
-        setVoiceTranscript('')
-        setLoading(true)
-
-        if (isListening) {
+    // Submit all user answers at once & trigger evaluation scorecard report
+    const submitAllAnswers = async () => {
+        // Stop speech recognition if listening
+        if (shouldBeListeningRef.current) {
+            shouldBeListeningRef.current = false
+            activeMicIndexRef.current = null
+            setActiveMicIndex(null)
             recognitionRef.current.stop()
             setIsListening(false)
         }
 
-        // Add user response to active chat timeline
-        const updatedMessages = [...messages, { sender: 'user', text: answerText, question: currentQuestion }]
-        setMessages(updatedMessages)
+        setLoading(true)
 
-        // Formulate prompt with score evaluation
-        const prompt = `You are an expert interviewer for the job role: ${jobTitle}.
-            We are conducting a technical interview.
+        // Compile question and answer pairs
+        const qaPairs = questionsList.map((q, idx) => ({
+            question: q,
+            answer: answers[idx] || '[No answer submitted]'
+        }))
+
+        // Verify if they answered at least one question
+        const hasAnyAnswer = qaPairs.some(qa => qa.answer.trim() && qa.answer !== '[No answer submitted]')
+        if (!hasAnyAnswer) {
+            alert("Please answer at least one question before submitting!")
+            setLoading(false)
+            return
+        }
+
+        // Formulate evaluation prompt
+        const prompt = `You are a professional technical interviewer named Zoro. 
+            Evaluate the candidate's answers for the following 10 technical questions for the role: ${jobTitle}.
             
-            Question asked: "${currentQuestion}"
-            Candidate answered: "${answerText}"
+            Here are the questions and candidate's answers:
+            ${JSON.stringify(qaPairs)}
             
-            Evaluate their answer.
-            Evaluate their technical accuracy:
+            For each question:
             1. Assign a "score" out of 10 (an integer from 0 to 10).
-            2. Write a "status": "Correct" if they got it right, "Partial" if they missed details, or "Wrong" if they answered incorrectly or said 'I don't know'.
-            3. Write a "critique" describing what was correct or missing.
+            2. Write a "status": "Correct" if they got it right/explained it well, "Partial" if they missed details, or "Wrong" if they answered incorrectly or left it blank.
+            3. Write a "critique" describing what was correct or missing in their response.
             4. In "modelAnswer", write a detailed phrasing tip showing how they should have answered to impress recruiters.
             5. In "example", write a simple analogy or real-world example explaining the concept.
             
-            Generate the next question based on the job description.
-            
             Return a JSON object containing exactly these keys:
-            - "feedback": {
-                "status": "Correct" | "Partial" | "Wrong",
-                "score": integer, 
-                "critique": "Constructive simple critique",
-                "modelAnswer": "How it should have been said to impress",
-                "example": "Simple example/metaphor explaining the concept"
-              },
-            - "nextQuestion": "The next technical question"
+            - "overallScore": integer (the average score scaled out of 100),
+            - "evaluations": [
+                {
+                  "question": "Question text",
+                  "answer": "Candidate's answer",
+                  "score": score_integer,
+                  "status": "Correct" | "Partial" | "Wrong",
+                  "critique": "Constructive simple critique",
+                  "modelAnswer": "How it should have been said to impress",
+                  "example": "Simple example/metaphor explaining the concept"
+                }
+              ]
             
             Return ONLY the raw JSON object. Do not include markdown wraps (like \`\`\`json).`
 
@@ -441,20 +527,26 @@ const MockInterview = () => {
                 const cleanJson = rawText.replace(/```json|```/g, '').trim()
                 const parsed = JSON.parse(cleanJson)
 
-                // Add interviewer bubble containing the evaluation score
-                setMessages(prev => [...prev, { 
-                    sender: 'interviewer', 
-                    text: `Here is my evaluation for Question #${questionCount}:`,
-                    feedback: parsed.feedback 
-                }])
+                const reportObj = {
+                    score: parsed.overallScore || 0,
+                    questionScores: parsed.evaluations || []
+                }
 
-                setCurrentQuestion(parsed.nextQuestion)
-                setQuestionCount(prev => prev + 1)
-                speakText(parsed.nextQuestion)
+                setFinalReport(reportObj)
+                setIsInterviewActive(false)
+                speakText("Your interview answers have been submitted. I have generated your evaluation scorecard.")
+
+                await saveReportToDb(reportObj)
+            } else {
+                if (response.status === 429) {
+                    alert("Google Gemini rate limit reached (429 Too Many Requests). Please wait 1 minute for the rate limit to reset and click Submit again.")
+                } else {
+                    alert(`Gemini API Error (Status ${response.status}). Failed to retrieve response. Please try submitting again.`)
+                }
             }
         } catch (err) {
             console.error(err)
-            alert("Error sending answer to interviewer.")
+            alert("Error sending answers to interviewer: " + err.message)
         } finally {
             setLoading(false)
         }
@@ -497,94 +589,7 @@ const MockInterview = () => {
         }
     }
 
-    // Force end the interview and generate the comprehensive performance scorecard
-    const handleEndInterview = async () => {
-        setLoading(true)
-        setIsInterviewActive(false)
-        if (isListening) {
-            recognitionRef.current.stop()
-            setIsListening(false)
-        }
 
-        // Cancel browser voice
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel()
-        }
-
-        // Extract all Q&A messages with feedback to compute overall rating
-        const qaPairs = messages.filter(m => m.sender === 'user').map((m, idx) => {
-            // Find corresponding interviewer response containing the evaluation score
-            const correspondingInterviewer = messages.find((v, i) => i > messages.indexOf(m) && v.sender === 'interviewer')
-            return {
-                question: m.question,
-                answer: m.text,
-                score: correspondingInterviewer?.feedback?.score || 0,
-                critique: correspondingInterviewer?.feedback?.critique || 'No feedback provided.'
-            }
-        })
-
-        // Calculate average score out of 100 based on individual scores
-        const totalScore = qaPairs.reduce((acc, curr) => acc + curr.score, 0)
-        const computedScore = qaPairs.length > 0 ? Math.round((totalScore / (qaPairs.length * 10)) * 100) : 0
-
-        // Call Gemini to generate overall Strengths & Improvements based on the interview history
-        const prompt = `You are a Lead Tech Recruiter. Compile a final overall assessment of the candidate's interview performance.
-            Here is their technical interview Q&A history:
-            ${JSON.stringify(qaPairs)}
-            
-            Write the overall feedback report containing:
-            - "strengths" (an array of strings highlighting technical areas they explained well)
-            - "improvements" (an array of strings suggesting concepts they need to review or practice)
-            
-            Return a JSON object containing exactly these keys:
-            - "strengths": ["string"],
-            - "improvements": ["string"]
-            
-            Return ONLY the raw JSON object. Do not include markdown wraps (like \`\`\`json).`
-
-        try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                }
-            )
-
-            if (response.ok) {
-                const data = await response.json()
-                const rawText = data.candidates[0].content.parts[0].text
-                const cleanJson = rawText.replace(/```json|```/g, '').trim()
-                const parsed = JSON.parse(cleanJson)
-
-                const reportObj = {
-                    score: computedScore,
-                    strengths: parsed.strengths,
-                    improvements: parsed.improvements,
-                    questionScores: qaPairs
-                }
-
-                setFinalReport(reportObj)
-                speakText("The interview is complete. I have generated your comprehensive evaluation report.")
-                
-                await saveReportToDb(reportObj)
-            }
-        } catch (err) {
-            console.error("Evaluation summary call failed:", err)
-            // Fallback report structure if summary call fails
-            const fallbackReport = {
-                score: computedScore,
-                strengths: ["Completed the voice interview session."],
-                improvements: ["Review individual question feedback below."],
-                questionScores: qaPairs
-            }
-            setFinalReport(fallbackReport)
-            await saveReportToDb(fallbackReport)
-        } finally {
-            setLoading(false)
-        }
-    }
 
     return (
         <div className="interview-container">
@@ -613,10 +618,11 @@ const MockInterview = () => {
                             >
                                 <option value="manual">Manual Input (Type Role & Paste Job Description)</option>
                                 <option value="upload">Upload Job Description File (PDF or TXT)</option>
+                                <option value="custom">Custom Focus (Language / Tool)</option>
                             </select>
                         </div>
 
-                        {setupMode === 'upload' ? (
+                        {setupMode === 'upload' && (
                             <div className="input-group">
                                 <label className="ats-label">Upload Job Description File (PDF or TXT)</label>
                                 <input 
@@ -627,7 +633,23 @@ const MockInterview = () => {
                                     required
                                 />
                             </div>
-                        ) : (
+                        )}
+
+                        {setupMode === 'custom' && (
+                            <div className="input-group">
+                                <label className="ats-label">Target Language or Tool</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Java, Python, React, Docker, SQL" 
+                                    value={customFocus}
+                                    onChange={(e) => setCustomFocus(e.target.value)}
+                                    className="ats-select"
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        {setupMode === 'manual' && (
                             <>
                                 <div className="input-group">
                                     <label className="ats-label">Target Job Role</label>
@@ -693,103 +715,142 @@ const MockInterview = () => {
 
             {/* Active Interview Workspace */}
             {isInterviewActive && (
-                <div className="interview-workspace no-print">
-                    <div className="chat-log-panel">
-                        <div className="chat-header">
+                <div className="interview-workspace no-print" style={{ display: 'flex', flexDirection: 'column', height: '80vh', backgroundColor: '#f8fafc', padding: '24px', borderRadius: '12px' }}>
+                    <div className="questionnaire-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                        <div className="chat-header" style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingBottom: '16px',
+                            borderBottom: '1px solid #e2e8f0',
+                            marginBottom: '16px'
+                        }}>
                             <div>
-                                <h3>Interview Room: {jobTitle} ({difficulty})</h3>
-                                <span className={`timer-tag ${timeLeft < 120 ? 'timer-danger' : ''}`}>
-                                    ⏱️ Time Left: {formatTime(timeLeft)}
-                                </span>
+                                <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.25rem' }}>Interview Session: {jobTitle} ({difficulty})</h3>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                                    Please read and answer the 10 questions generated below. You can either type your answers or tap the mic button on each question to speak them.
+                                </p>
                             </div>
-                            <button onClick={handleEndInterview} className="end-interview-action-btn">
-                                End Interview & Get Report
+                            <button onClick={() => {
+                                if (shouldBeListeningRef.current) {
+                                    shouldBeListeningRef.current = false
+                                    activeMicIndexRef.current = null
+                                    setActiveMicIndex(null)
+                                    recognitionRef.current.stop()
+                                    setIsListening(false)
+                                }
+                                setIsInterviewActive(false)
+                            }} className="end-interview-action-btn" style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
+                                Cancel & Exit
                             </button>
                         </div>
                         
-                        <div className="chat-messages-container">
-                            {messages.map((msg, index) => (
-                                <div key={index} className={`chat-bubble-row ${msg.sender}`}>
-                                    <div className="bubble-avatar">{msg.sender === 'user' ? 'ME' : 'AI'}</div>
-                                    <div className="chat-bubble">
-                                        {msg.question && <p className="origin-question"><strong>Q:</strong> {msg.question}</p>}
-                                        <p>{msg.text}</p>
-                                        
-                                        {msg.feedback && (
-                                            <div className={`feedback-evaluation-card status-${msg.feedback.status?.toLowerCase()}`}>
-                                                <div className="evaluation-status-bar">
-                                                    <strong>Evaluation: {msg.feedback.status} ({msg.feedback.score}/10)</strong>
-                                                </div>
-                                                <p className="eval-critique"><strong>Critique:</strong> {msg.feedback.critique}</p>
-                                                <p className="eval-model"><strong>How to Impress:</strong> {msg.feedback.modelAnswer}</p>
-                                                {msg.feedback.example && (
-                                                    <p className="eval-example"><strong>Simple Metaphor/Example:</strong> {msg.feedback.example}</p>
-                                                )}
-                                            </div>
-                                        )}
+                        <div className="questionnaire-scroll-area" style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
+                            {questionsList.map((q, idx) => (
+                                <div key={idx} className="question-card" style={{
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '8px',
+                                    padding: '16px',
+                                    marginBottom: '20px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                                }}>
+                                    <div className="question-card-header" style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        marginBottom: '10px'
+                                    }}>
+                                        <h4 style={{ margin: 0, color: '#1e293b', fontSize: '0.95rem' }}>Question {idx + 1}</h4>
+                                        <button
+                                            onClick={() => toggleListening(idx)}
+                                            className={`mic-toggle-btn ${activeMicIndex === idx ? 'active' : ''}`}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontSize: '0.8rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                borderRadius: '20px',
+                                                border: '1px solid #cbd5e1',
+                                                cursor: 'pointer',
+                                                backgroundColor: activeMicIndex === idx ? '#ef4444' : '#f8fafc',
+                                                color: activeMicIndex === idx ? '#fff' : '#475569',
+                                                fontWeight: '500',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            type="button"
+                                        >
+                                            {activeMicIndex === idx ? '🛑 Stop Dictation' : '🎙️ Tap to Speak'}
+                                        </button>
                                     </div>
+                                    
+                                    <p style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '0.9rem', lineHeight: '1.4', fontWeight: '500' }}>{q}</p>
+                                    
+                                    {activeMicIndex === idx && (
+                                        <div className="waveform-small" style={{ display: 'flex', gap: '3px', alignItems: 'center', marginBottom: '8px' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 'bold' }}>Recording... Speak now.</span>
+                                        </div>
+                                    )}
+
+                                    <textarea
+                                        placeholder="Type your answer here or tap the microphone to dictate..."
+                                        value={answers[idx] || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value
+                                            const newAnswers = [...answers]
+                                            newAnswers[idx] = val
+                                            setAnswers(newAnswers)
+                                            answersRef.current = newAnswers
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            boxSizing: 'border-box',
+                                            borderRadius: '6px',
+                                            border: '1px solid #cbd5e1',
+                                            padding: '10px',
+                                            fontSize: '0.85rem',
+                                            minHeight: '80px',
+                                            resize: 'vertical',
+                                            fontFamily: 'inherit'
+                                        }}
+                                        rows="3"
+                                    ></textarea>
                                 </div>
                             ))}
-                            {loading && (
-                                <div className="chat-bubble-row interviewer">
-                                    <div className="bubble-avatar">AI</div>
-                                    <div className="chat-bubble loading-bubble">
-                                        <div className="typing-dots">
-                                            <span></span><span></span><span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={chatEndRef} />
                         </div>
 
-                        {/* Voice controls */}
-                        <div className="chat-controls-bar">
-                            <div className="voice-visualizer">
-                                {isListening && (
-                                    <div className="waveform">
-                                        <span className="wave-bar"></span>
-                                        <span className="wave-bar"></span>
-                                        <span className="wave-bar"></span>
-                                        <span className="wave-bar"></span>
-                                    </div>
-                                )}
-                                <span className="visualizer-status">
-                                    {isListening ? 'Interviewer is listening to your answer...' : 'Microphone is muted.'}
-                                </span>
-                            </div>
-
-                            <div className="active-question-display">
-                                <strong>Question:</strong> {currentQuestion}
-                            </div>
-
-                            <div className="transcript-box-wrapper">
-                                <textarea 
-                                    placeholder="Click the microphone and start speaking your answer, or type it here..."
-                                    value={voiceTranscript}
-                                    onChange={(e) => setVoiceTranscript(e.target.value)}
-                                    className="transcript-textarea"
-                                    rows="3"
-                                ></textarea>
-                            </div>
-
-                            <div className="controls-buttons-group">
-                                <button 
-                                    onClick={toggleListening} 
-                                    className={`mic-toggle-btn ${isListening ? 'active' : ''}`}
-                                    type="button"
-                                >
-                                    {isListening ? '🎙️ Stop Listening' : '🎙️ Tap to Speak'}
-                                </button>
-                                <button 
-                                    onClick={submitAnswer} 
-                                    className="submit-answer-btn"
-                                    disabled={loading}
-                                    type="button"
-                                >
-                                    Submit Answer
-                                </button>
-                            </div>
+                        <div className="questionnaire-footer" style={{
+                            paddingTop: '16px',
+                            borderTop: '1px solid #e2e8f0',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            gap: '12px',
+                            marginTop: '16px'
+                        }}>
+                            <button
+                                onClick={submitAllAnswers}
+                                className="submit-answer-btn"
+                                disabled={loading}
+                                style={{
+                                    padding: '10px 24px',
+                                    fontSize: '0.95rem',
+                                    backgroundColor: '#4f46e5',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    transition: 'all 0.2s',
+                                    opacity: loading ? 0.7 : 1
+                                }}
+                                type="button"
+                            >
+                                {loading ? 'Submitting Answers...' : 'Submit All Answers & Get Report'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -801,29 +862,10 @@ const MockInterview = () => {
                     <h2>Mock Interview Performance Report</h2>
                     <p className="subtitle">Rating score and question feedback for the role of {jobTitle} ({difficulty})</p>
                     
-                    <div className="report-card">
+                    <div className="report-card" style={{ justifyContent: 'center' }}>
                         <div className="overall-score-section">
                             <div className="large-score-circle">{finalReport.score}%</div>
                             <h3>Overall Score</h3>
-                        </div>
-                        
-                        <div className="strengths-improvements-section">
-                            <div className="report-list-box">
-                                <h4>Key Strengths</h4>
-                                <ul>
-                                    {finalReport.strengths?.map((str, i) => (
-                                        <li key={i}>✅ {str}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="report-list-box" style={{ marginTop: '16px' }}>
-                                <h4>Recommended Improvements</h4>
-                                <ul>
-                                    {finalReport.improvements?.map((imp, i) => (
-                                        <li key={i}>💡 {imp}</li>
-                                    ))}
-                                </ul>
-                            </div>
                         </div>
                     </div>
 
@@ -832,7 +874,7 @@ const MockInterview = () => {
                         <h3>Detailed Questions Breakdown ({finalReport.questionScores?.length} asked)</h3>
                         <div className="qa-breakdown-list">
                             {finalReport.questionScores?.map((qa, index) => (
-                                <div key={index} className="qa-report-item">
+                                <div key={index} className="qa-report-item" style={{ marginBottom: '24px' }}>
                                     <div className="qa-report-header">
                                         <span className="qa-number">Q{index + 1}</span>
                                         <span className="qa-score-badge">Score: {qa.score}/10</span>
@@ -840,6 +882,8 @@ const MockInterview = () => {
                                     <p className="qa-question-text"><strong>Question:</strong> {qa.question}</p>
                                     <p className="qa-answer-text"><strong>Your Answer:</strong> {qa.answer || '[No spoken answer submitted]'}</p>
                                     <p className="qa-feedback-text"><strong>Coaching Advice:</strong> {qa.critique}</p>
+                                    {qa.modelAnswer && <p className="qa-feedback-text"><strong>How to Impress:</strong> {qa.modelAnswer}</p>}
+                                    {qa.example && <p className="qa-feedback-text"><strong>Simple Metaphor/Example:</strong> {qa.example}</p>}
                                 </div>
                             ))}
                         </div>

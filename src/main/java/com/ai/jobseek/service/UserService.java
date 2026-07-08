@@ -13,15 +13,21 @@ public class UserService {
     private UserRepo userrepo;
 
     public Users registerUser(Users u) {
-        if(userrepo.findByEmail(u.getEmail()) != null) {
+        if (userrepo.findByEmail(u.getEmail()) != null) {
             return null;
+        }
+        if (u.getPremium() == null) {
+            u.setPremium(false);
+        }
+        if (u.getAtsScansCount() == null) {
+            u.setAtsScansCount(0);
         }
         return userrepo.save(u);
     }
 
     public Users validateUser(String email, String password) {
         Users u = userrepo.findByEmail(email);
-        if(u != null && u.getPassword().equals(password)) {
+        if (u != null && u.getPassword().equals(password)) {
             return u;
         }
         return null;
@@ -48,23 +54,18 @@ public class UserService {
         return null;
     }
 
-    public Users upgradeToPremium(Integer id)
-    {
+    public Users upgradeToPremium(Integer id) {
         Users existing = userrepo.findById(id).orElse(null);
-        if(existing != null)
-        {
+        if (existing != null) {
             existing.setPremium(true);
             return userrepo.save(existing);
         }
         return null;
     }
-    
 
-    public Users incrementAtsScanCount(Integer id)
-    {
+    public Users incrementAtsScanCount(Integer id) {
         Users existing = userrepo.findById(id).orElse(null);
-        if(existing != null)
-        {
+        if (existing != null) {
             existing.setAtsScansCount(existing.getAtsScansCount() + 1);
             return userrepo.save(existing);
         }

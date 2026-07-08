@@ -29,6 +29,6 @@ public class Users {
     private String githubUrl;
     private String linkedinUrl;
 
-    private boolean premium = false;
-    private int atsScansCount = 0;
+    private Boolean premium = false;
+    private Integer atsScansCount = 0;
 }

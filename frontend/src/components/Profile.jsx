@@ -378,43 +378,28 @@ const Profile = () => {
                                                     </div>
                                                     <div className="history-details-toggle">
                                                         <details style={{ marginTop: '8px' }}>
-                                                            <summary style={{ cursor: 'pointer', fontSize: '0.85rem', color: '#4f46e5' }}>View Full Evaluation Details</summary>
-                                                            <div className="history-details-content" style={{ marginTop: '8px', fontSize: '0.8rem', color: '#374151' }}>
-                                                                {strengths.length > 0 && (
-                                                                    <div style={{ marginBottom: '6px' }}>
-                                                                        <strong>Key Strengths:</strong>
-                                                                        <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
-                                                                            {strengths.map((str, sIdx) => <li key={sIdx}>✅ {str}</li>)}
-                                                                        </ul>
-                                                                    </div>
-                                                                )}
-                                                                {improvements.length > 0 && (
-                                                                    <div style={{ marginBottom: '6px' }}>
-                                                                        <strong>Areas for Improvement:</strong>
-                                                                        <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
-                                                                            {improvements.map((imp, iIdx) => <li key={iIdx}>💡 {imp}</li>)}
-                                                                        </ul>
-                                                                    </div>
-                                                                )}
-                                                                {questionScores.length > 0 && (
-                                                                    <div>
-                                                                        <strong>Question Breakdown:</strong>
-                                                                        <div style={{ maxHeight: '150px', overflowY: 'auto', marginTop: '4px', border: '1px solid #e5e7eb', padding: '6px', borderRadius: '4px', backgroundColor: '#f9fafb' }}>
-                                                                            {questionScores.map((qs, qIdx) => (
-                                                                                <div key={qIdx} style={{ paddingBottom: '6px', borderBottom: qIdx === questionScores.length - 1 ? 'none' : '1px solid #f3f4f6', marginBottom: '6px' }}>
-                                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                                                                                        <span>Q{qIdx + 1}: {qs.question}</span>
-                                                                                        <span style={{ color: '#059669' }}>{qs.score}/10</span>
-                                                                                    </div>
-                                                                                    <div style={{ color: '#4b5563', fontStyle: 'italic', marginTop: '2px' }}>Your Answer: {qs.answer || '[No Answer]'}</div>
-                                                                                    <div style={{ color: '#2563eb', marginTop: '2px' }}>Feedback: {qs.critique}</div>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </details>
+                                                             <summary style={{ cursor: 'pointer', fontSize: '0.85rem', color: '#4f46e5' }}>View Full Evaluation Details</summary>
+                                                             <div className="history-details-content" style={{ marginTop: '8px', fontSize: '0.85rem', color: '#374151' }}>
+                                                                 {questionScores.length > 0 && (
+                                                                     <div>
+                                                                         <div style={{ maxHeight: '350px', overflowY: 'auto', marginTop: '4px', border: '1px solid #e5e7eb', padding: '12px', borderRadius: '6px', backgroundColor: '#f9fafb' }}>
+                                                                             {questionScores.map((qs, qIdx) => (
+                                                                                 <div key={qIdx} style={{ paddingBottom: '12px', borderBottom: qIdx === questionScores.length - 1 ? 'none' : '1px solid #e5e7eb', marginBottom: '12px' }}>
+                                                                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '0.9rem', color: '#1e293b' }}>
+                                                                                         <span>Q{qIdx + 1}: {qs.question}</span>
+                                                                                         <span style={{ color: '#059669' }}>{qs.score}/10</span>
+                                                                                     </div>
+                                                                                     <div style={{ color: '#4b5563', fontStyle: 'italic', marginTop: '4px' }}><strong>Your Answer:</strong> {qs.answer || '[No Answer]'}</div>
+                                                                                     <div style={{ color: '#2563eb', marginTop: '4px' }}><strong>Coaching Advice (Zoro's critique of your answer):</strong> {qs.critique}</div>
+                                                                                     {qs.modelAnswer && <div style={{ color: '#059669', marginTop: '4px' }}><strong>How to Impress (The optimized model phrasing tip):</strong> {qs.modelAnswer}</div>}
+                                                                                     {qs.example && <div style={{ color: '#4f46e5', marginTop: '4px' }}><strong>Simple Metaphor/Example (The conceptual analogy explaining the concept):</strong> {qs.example}</div>}
+                                                                                 </div>
+                                                                             ))}
+                                                                         </div>
+                                                                     </div>
+                                                                 )}
+                                                             </div>
+                                                         </details>
                                                     </div>
                                                 </div>
                                             )

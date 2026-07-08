@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobSeek Project Documentation & Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --dark: #1e293b;
+            --light-bg: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 50px 60px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 35px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 25px;
+            color: #0f172a;
+        }
+
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-bottom: 25px;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .highlight-box {
+            background-color: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 25px 0;
+        }
+
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.95rem;
+            color: #d946ef;
+        }
+
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: Consolas, monospace;
+            font-size: 0.9rem;
+            margin: 20px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 9999px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            margin-right: 8px;
+        }
+
+        .flow-diagram {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #faf5ff;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            margin: 20px 0;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>JobSeek: Career Assistant Platform</h1>
+        <p class="subtitle">Complete Technical Project Architecture & Functionality Documentation</p>
+    </header>
+
+    <section>
+        <h2>1. Executive Summary</h2>
+        <p>
+            <strong>JobSeek</strong> is a comprehensive AI-powered career enhancement system designed to bridge the gap between job candidates and industry recruiters. The platform comprises a React frontend built with Vite and a Spring Boot (Java) backend connected to a MySQL relational database. The core feature set includes a dynamic Resume Builder, an Automated Tracking System (ATS) Resume Matcher, and an AI-driven Mock Interviewer powered by the Google Gemini model. Additionally, the platform integrates a premium tier restriction layer backed by the Razorpay payment gateway to monetize resources.
+        </p>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section>
+        <h2>2. Architecture & Tech Stack</h2>
+        <p>
+            The project leverages a modern, decoupled client-server architecture:
+        </p>
+        <ul>
+            <li><strong>Frontend</strong>: Built with <strong>React (Vite)</strong>. Uses standard CSS for styling and custom modules for features like markdown parsing, Speech Recognition (Web Speech API), and text-to-speech synthesis.</li>
+            <li><strong>Backend</strong>: Developed in <strong>Spring Boot (v4.1.0)</strong>, using Spring MVC for REST APIs, Spring Data JPA for object-relational mapping, and Lombok for boilerplate reduction.</li>
+            <li><strong>Database</strong>: <strong>MySQL (v8.0)</strong>, maintaining schemas for users, uploaded resumes, applied jobs, completed challenges, and interview scorecards.</li>
+            <li><strong>AI Services</strong>: Powered by <strong>Google Gemini 2.5 Flash</strong> via HTTP REST interfaces to generate scores, critiques, and questions.</li>
+            <li><strong>Payments</strong>: <strong>Razorpay Java SDK</strong> and Frontend SDK for transaction processing.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>3. Database Models & Schema</h2>
+        <p>
+            The database consists of five main relational tables mapping the application entities:
+        </p>
+        
+        <h3>A. Users Entity (<code>users</code> table)</h3>
+        <p>
+            Maintains account credentials, profiles, premium status, and scan usage counts.
+        </p>
+        <pre>
+Table: users
++------------------+--------------+------+
+| Field            | Type         | Null |
++------------------+--------------+------+
+| id               | int          | NO   |
+| name             | varchar(255) | YES  |
+| email            | varchar(255) | YES  | (Unique)
+| password         | varchar(255) | YES  |
+| mobile           | varchar(255) | YES  |
+| premium          | bit(1)       | YES  | (Upgrade flag)
+| ats_scans_count  | int          | YES  | (Scan counters)
++------------------+--------------+------+
+        </pre>
+
+        <h3>B. Resume Entity (<code>resume</code> table)</h3>
+        <p>
+            Stores details for candidate resumes, structured in JSON arrays for skills, experience, projects, and education.
+        </p>
+
+        <h3>C. MockInterviewReport Entity (<code>mock_interview_report</code> table)</h3>
+        <p>
+            Stores detailed performance scorecard evaluations returned by the AI interviewer, keeping history for candidates.
+        </p>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section>
+        <h2>4. Core Platform Functionalities</h2>
+        
+        <h3>A. Resume Builder</h3>
+        <p>
+            The Resume Builder gathers personal information, headlines, detailed experiences, and skills using a multi-step form. Once submitted, the data is packaged into a JSON payload and sent to the backend, enabling candidates to format and render standardized professional resumes.
+        </p>
+
+        <h3>B. ATS Resume Matcher</h3>
+        <p>
+            The ATS Matcher compares a candidate's resume (PDF or plain text) against a target job description:
+        </p>
+        <ol>
+            <li>Extracts text from the job description and candidate resume.</li>
+            <li>Constructs an advanced analysis prompt and queries the <strong>Gemini 2.5 Flash</strong> model.</li>
+            <li>Returns a clean JSON response containing a match score, a list of missing keywords, and detailed bullet-point optimization suggestions.</li>
+        </ol>
+
+        <h3>C. Zoro Mock Interviewer (Speech & AI System)</h3>
+        <p>
+            The mock interviewer behaves like a live, professional technical recruiter named <strong>Zoro</strong>:
+        </p>
+        <div class="highlight-box">
+            <strong>Key Features:</strong>
+            <ul>
+                <li><strong>First Question Greeting</strong>: Bypasses API loading delay. Starts immediately with a voice greeting: <em>"Hello! I am Zoro... Can you please introduce yourself?"</em></li>
+                <li><strong>Persistent Speech Recording</strong>: Uses the browser's Web Speech API. If a candidate pauses to think, the system handles the <code>no-speech</code> error code and restarts recording after a <code>800ms</code> delay. It appends new sentences cleanly to previous sentences rather than overwriting them.</li>
+                <li><strong>Male Voice Utterance</strong>: Plays Zoro's questions using a male text-to-speech engine filter (e.g. <code>Microsoft David</code>).</li>
+                <li><strong>Difficulty Scenarios</strong>:
+                    <ul>
+                        <li><strong>Beginner</strong>: Evaluates only skills, asking core programming questions.</li>
+                        <li><strong>Intermediate</strong>: Mixes core concepts, framework internals, and basic project details.</li>
+                        <li><strong>Hard</strong>: Deep-dives into concurrent operations, system design, and the candidate's exact project tech stacks.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section>
+        <h2>5. Premium Monetization & Payment Flow</h2>
+        <p>
+            The system limits free users to 100 Resumes, 100 ATS Scans, and 100 Mock Interviews. Reaching any limit blocks access and displays a premium pop-up modal redirecting to the payments page.
+        </p>
+
+        <div class="flow-diagram">
+[Candidate] ---> Click "Pay Premium" ---> [Spring Boot: create-order]
+                                                   |
+                                            Calls Razorpay API
+                                                   |
+[Razorpay Popup] <--- returns Order ID <-----------+
+      |
+Candidate completes UPI/Card Payment
+      |
+[Spring Boot: verify-payment] ---> HMAC-SHA256 Check Signature
+                                         |
+[DB: users table] <--- Upgrade Premium <-+
+        </div>
+
+        <h3>A. Backend Integration</h3>
+        <p>
+            The backend verifies Razorpay's SHA-256 webhook/checkout signatures to guarantee that payment state upgrades cannot be forged:
+        </p>
+        <pre>
+Mac sha256 = Mac.getInstance("HmacSHA256");
+SecretKeySpec secretKey = new SecretKeySpec(keySecret.getBytes(), "HmacSHA256");
+sha256.init(secretKey);
+byte[] hash = sha256.doFinal(data.getBytes());
+String generatedSignature = Hex.encodeHexString(hash);
+        </pre>
+    </section>
+
+    <section>
+        <h2>6. Code Flow & Flaw Corrections</h2>
+        <p>
+            During construction, several critical technical issues were resolved:
+        </p>
+        <ul>
+            <li><strong>React ReferenceError (Home.jsx)</strong>: The page initially crashed after login because `useEffect` was not imported. This was resolved by importing `useEffect` from React.</li>
+            <li><strong>Jackson Deserialization Primitive Mismatch</strong>: The backend crashed with `400 Bad Request` during login and registration when mapping null values to primitive Java types (`boolean` and `int`). Mappings were changed to wrapper objects (`Boolean` and `Integer`) to allow null fields cleanly.</li>
+            <li><strong>SQL Constraint Violation</strong>: The `users` table columns had a `NOT NULL` restriction. This caused registration to fail since the signup form did not supply counts. Safe default values (`false` and `0`) were explicitly assigned in the `registerUser` service method to solve this.</li>
+            <li><strong>Microphone Stale Closure</strong>: Web Speech API event listeners locked themselves to initial empty strings due to stale closures. Resolving this involved declaring a mutable tracking ref (`voiceTranscriptRef`) to keep text synced and appending sentences across sessions.</li>
+        </ul>
+    </section>
+    
+    <footer style="margin-top: 50px; text-align: center; border-top: 1px solid var(--border); padding-top: 20px; color: var(--text-muted);">
+        <p>JobSeek Careers System Documentation | Generated July 2026</p>
+    </footer>
+</div>
+
+</body>
+</html>
